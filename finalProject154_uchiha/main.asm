@@ -1,13 +1,16 @@
 INCLUDE Irvine32.inc
 
 .data
-balance DWORD 0
+; general data
+balance DWORD 0 
 MAX_ALLOWED DWORD 20
 amount DWORD 0
 correctGuesses DWORD 0
 missedGuesses DWORD 0
 name DWORD 15 DUP(?)
 
+
+; strings for display
 menu_text BYTE "*** Uchiha ***", 0dh, 0ah, 0dh, 0ah
 	 BYTE "*** MAIN MENU ***", 0dh, 0ah, 0dh, 0ah
 	 BYTE "Please Select one of the following:", 0dh, 0ah, 0dh, 0ah
@@ -17,23 +20,28 @@ menu_text BYTE "*** Uchiha ***", 0dh, 0ah, 0dh, 0ah
 	 BYTE "4. Display my statistics", 0dh, 0ah
 	 BYTE "5. To exit", 0dh, 0ah, 0
 
-input DWORD ?
-
 current_balance_text BYTE "=> Your available balance is: $ ", 0
+
 add_credits_text BYTE "=> Please enter the amount you would like to add: ", 0
 
 program_continuesd BYTE "=> Program Contirnuesd", 0
+
+; input variable
+input DWORD ?
 
 .code
 main proc
 
 start:
+	; display menu
 	mov edx, OFFSET menu_text
 	call writeString
-	call ReadInt
 
+	; collect user input
+	call ReadInt
 	mov input, eax
-	mov eax, 1
+
+	mov eax, 1 
 	CMP eax, input
 	JE display_balance
 	
@@ -53,7 +61,7 @@ start:
 	CMP eax, input
 	JE exit_game
 
-	JMP continue
+	JMP continue 
 
 	display_balance:
 		mov edx, OFFSET current_balance_text
