@@ -1,3 +1,4 @@
+
 INCLUDE Irvine32.inc
 
 .data
@@ -63,7 +64,7 @@ start:
 
 	JMP continue 
 
-	display_balance:
+	display_balance: ; menu option 1
 		mov edx, OFFSET current_balance_text
 		call WriteString
 		mov eax, balance
@@ -71,24 +72,32 @@ start:
 		call crlf
 		JMP continue
 
-	add_credits:
+	add_credits: ; menu option 2
 		mov edx, OFFSET add_credits_text
 		call WriteString
 		call ReadInt
 		add balance, eax
 		JMP continue
 
-	play_game:
+	play_game: ; menu option 3
+		; BEGIN UNTESTED CODE
+		mov eax, balance
+		dec eax
+		mov balance, eax
+		; END UNTESTED CODE
 		JMP continue
 
-	display_statistics:
+	display_statistics: ; menu option 4
 		JMP continue
 
-	exit_game:
-		JMP continue
+	exit_game: ; menu option 5
+		; BEGIN UNTESTED CODE
+		exit
+		; BEGIN UNTESTED CODE
 
 	continue:
-		mov edx, OFFSET program_continuesd
+		; TEST CODE
+		mov edx, OFFSET program_continuesd 
 		call WriteString
 		call crlf
 		JMP start
