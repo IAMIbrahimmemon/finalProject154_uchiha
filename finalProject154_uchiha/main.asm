@@ -1,4 +1,4 @@
-
+; --------------------------
 INCLUDE Irvine32.inc
 
 .data
@@ -26,6 +26,8 @@ current_balance_text BYTE "=> Your available balance is: $ ", 0
 add_credits_text BYTE "=> Please enter the amount you would like to add: ", 0
 
 program_continuesd BYTE "=> Program Contirnuesd", 0
+
+program_exiting BYTE "=> Program Exiting...", 0
 
 ; input variable
 input DWORD ?
@@ -92,17 +94,20 @@ start:
 
 	exit_game: ; menu option 5
 		; BEGIN UNTESTED CODE
-		exit
+
+		jmp go_to_exit
 		; BEGIN UNTESTED CODE
 
 	continue:
-		; TEST CODE
 		mov edx, OFFSET program_continuesd 
 		call WriteString
 		call crlf
 		JMP start
 
-	exit
+	go_to_exit: 
+		mov edx, OFFSET program_exiting
+		call WriteString
+		exit
 main endp
 
 end main
