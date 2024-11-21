@@ -38,19 +38,19 @@ current_balance_text BYTE "=> Your available balance is: $ ", 0
 
 add_credits_text BYTE "=> Please enter the amount you would like to add: ", 0
 
-program_continuesd BYTE "=> Program Contirnuesd", 0
+program_continuesd BYTE " ", 0ah, 0dh, 0
 
-program_exiting BYTE "Program is exiting. Thank you for playing.",0
+program_exiting BYTE "Program is exiting. Thank you for playing. ",0
 
-enter_guess_game_msg BYTE "=> Enter a number from 1-10", 0
-win_guess_game_msg BYTE "You won, Congratuluations. You get $2", 0
-lose_guess_game_msg BYTE "You lost. womp womp. You just lost a dolla.", 0
+enter_guess_game_msg BYTE "=> Enter a number from 1-10: ", 0
+win_guess_game_msg BYTE "You won, Congratulations. You get $2.", 0ah, 0dh, 0
+lose_guess_game_msg BYTE "You lost loser. You lost $1. ", 0
 correct_answer_guess_game_msg BYTE "The correct answer was: ",0
 
 ask_to_play_again_msg BYTE "Would you like to play again? Enter 1 for yes and 0 for no: ",0
 play_again_input DWORD 0
 
-stats_credit_msg BYTE "Avaialable Credit:", 0
+stats_credit_msg BYTE "Avaialable Credit: ", 0
 stats_game_played_msg BYTE "Games Played: ", 0
 stats_correct_guesses_msg BYTE "Correct Guesses: ", 0
 stats_missed_guesses_msg BYTE "Missed Guesses: ", 0
@@ -138,7 +138,7 @@ start:
 		JMP lose_game
 
 	lose_game:
-		inc money_lost
+		add money_lost, 1
 		mov edx, OFFSET lose_guess_game_msg
 		call writeString
 		mov edx, OFFSET correct_answer_guess_game_msg
@@ -147,6 +147,7 @@ start:
 		call WriteInt
 		call crlf
 		add games_played, 1
+		add missed_guesses, 1
 		JMP play_again
 
 	win_game:
@@ -155,6 +156,7 @@ start:
 		call writeString
 		add balance, 2
 		add games_played, 1
+		add correct_guesses, 1
 		JMP play_again
 
 	play_again:
