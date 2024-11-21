@@ -52,7 +52,7 @@ ask_to_play_again_msg BYTE 0ah, 0dh, "Would you like to play again? Remember: 99
 
 play_again_input DWORD 0
 
-stats_credit_msg BYTE "Avaialable Credit: ", 0
+stats_credit_msg BYTE "Available Credit: ", 0
 stats_game_played_msg BYTE "Games Played: ", 0
 stats_correct_guesses_msg BYTE "Correct Guesses: ", 0
 stats_missed_guesses_msg BYTE "Missed Guesses: ", 0
@@ -74,13 +74,23 @@ uchiha_title_msg BYTE "      ___           ___           ___                    
 	BYTE "     \/__/         \/__/         \/__/                     \/__/         \/__/    ", 0ah, 0dh, 0ah, 0dh ,0
 
 .code
+
+
+
 main proc
+
+mov eax, lightblue + (black * 16)
+call SetTextcolor 
 
 mov edx, OFFSET uchiha_title_msg
 call writeString
 
+mov eax, white + (black * 16)
+call SetTextcolor 
+
 start:
 	; display menu
+
 	mov edx, OFFSET menu_text
 	call writeString
 
@@ -113,9 +123,13 @@ start:
 	display_balance: ; menu option 1
 		mov edx, OFFSET current_balance_text
 		call WriteString
+		mov eax, green + (black * 16)
+		call SetTextcolor 
 		mov eax, balance
 		call WriteInt
 		call crlf
+		mov eax, white + (black * 16)
+		call SetTextcolor 
 		JMP continue
 
 	add_credits: ; menu option 2
@@ -140,6 +154,8 @@ start:
 		JMP lose_game
 
 	lose_game:
+		mov eax, red + (black * 16)
+		call SetTextcolor 
 		add money_lost, 1
 		mov edx, OFFSET lose_guess_game_msg
 		call writeString
@@ -150,18 +166,26 @@ start:
 		call crlf
 		add games_played, 1
 		add missed_guesses, 1
+		mov eax, white + (black * 16)
+		call SetTextcolor 
 		JMP play_again
 
 	win_game:
+		mov eax, green + (black * 16)
+		call SetTextcolor 
 		add money_won, 2
 		mov edx, OFFSET win_guess_game_msg
 		call writeString
 		add balance, 2
 		add games_played, 1
 		add correct_guesses, 1
+		mov eax, white + (black * 16)
+		call SetTextcolor 
 		JMP play_again
 
 	play_again:
+		mov eax, yellow + (black * 16)
+		call SetTextcolor 
 		mov edx, OFFSET ask_to_play_again_msg
 		call writeString
 
@@ -169,12 +193,17 @@ start:
 		call ReadInt
 		mov play_again_input, eax
 
+		mov eax, white + (black * 16)
+		call SetTextcolor 
+
 		mov eax, 1 
 		CMP eax, play_again_input
 		JE play_game
 		JMP continue
 
 	display_statistics: ; menu option 4
+		mov eax, yellow + (black * 16)
+		call SetTextcolor 
 		mov edx, OFFSET stats_credit_msg
 		call WriteString
 		mov eax, balance
@@ -185,26 +214,36 @@ start:
 		mov eax, games_played
 		call WriteInt
 		call crlf
+		mov eax, green + (black * 16)
+		call SetTextcolor 
 		mov edx, OFFSET stats_correct_guesses_msg
 		call WriteString
 		mov eax, correct_guesses
 		call WriteInt
 		call crlf
+		mov eax, red + (black * 16)
+		call SetTextcolor 
 		mov edx, OFFSET stats_missed_guesses_msg
 		call WriteString
 		mov eax, missed_guesses
 		call WriteInt
 		call crlf
+		mov eax, green + (black * 16)
+		call SetTextcolor 
 		mov edx, OFFSET stats_money_won_msg
 		call WriteString
 		mov eax, money_won
 		call WriteInt
 		call crlf
+		mov eax, red + (black * 16)
+		call SetTextcolor 
 		mov edx, OFFSET stats_money_lost_msg
 		call WriteString
 		mov eax, money_lost
 		call WriteInt
 		call crlf
+		mov eax, white + (black * 16)
+		call SetTextcolor 
 		JMP continue
 
 	exit_game:
@@ -221,5 +260,6 @@ start:
 		call WriteString
 		exit
 main endp
+
 
 end main
