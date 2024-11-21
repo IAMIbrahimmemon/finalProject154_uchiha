@@ -47,7 +47,9 @@ win_guess_game_msg BYTE "You won, Congratulations. You get $2.", 0ah, 0dh, 0
 lose_guess_game_msg BYTE "You lost loser. You lost $1. ", 0
 correct_answer_guess_game_msg BYTE "The correct answer was: ",0
 
-ask_to_play_again_msg BYTE "Would you like to play again? Enter 1 for yes and 0 for no: ",0
+ask_to_play_again_msg BYTE 0ah, 0dh, "Would you like to play again? Remember: 99% of gamblers quit befor they hit BIG!", 0ah, 0dh 
+	BYTE "Enter 1 for yes and 0 for no: ", 0
+
 play_again_input DWORD 0
 
 stats_credit_msg BYTE "Avaialable Credit: ", 0
@@ -221,4 +223,3 @@ start:
 main endp
 
 end main
-
