@@ -29,7 +29,7 @@ newline BYTE 0Dh, 0Ah, 0
 
 
 ; Beginning Screen
-enter_name BYTE "Enter Your Name", 0dh, 0ah, 0dh, 0ah
+enter_name BYTE "Enter Your Name: ", 0
 
 
 ; strings for display
@@ -46,16 +46,16 @@ current_balance_text BYTE "=> Your available balance is: $ ", 0
 
 add_credits_text BYTE "=> Please enter the amount you would like to add: ", 0
 
-program_continued BYTE " ", 0ah, 0dh, 0
-
 program_exiting BYTE "Program is exiting. Thank you for playing. ",0
 
 enter_guess_game_msg BYTE "=> Enter a number from 1-10: ", 0
 win_guess_game_msg BYTE "You won, Congratulations. You get $2.", 0ah, 0dh, 0
 lose_guess_game_msg BYTE "You lost loser. You lost $1. ", 0
 correct_answer_guess_game_msg BYTE "The correct answer was: ",0
+out_of_money_msg BYTE "You ran out of money. Please add some more to your account before you play a game.", 0
 
-ask_to_play_again_msg BYTE 0ah, 0dh, "Would you like to play again? Remember: 99% of gamblers quit befor they hit BIG!", 0ah, 0dh 
+
+ask_to_play_again_msg BYTE 0ah, 0dh, "Would you like to play again? Remember: 99% of gamblers quit before they hit BIG!", 0ah, 0dh 
 	BYTE "Enter 1 for yes and 0 for no: ", 0
 
 play_again_input DWORD 0
@@ -89,14 +89,14 @@ uchiha_title_msg BYTE "      ___           ___           ___                    
 
 main proc
 
-mov eax, lightblue + (black * 16)
-call SetTextcolor 
+	mov eax, lightblue + (black * 16)
+	call SetTextcolor 
 
-mov edx, OFFSET uchiha_title_msg
-call writeString
+	mov edx, OFFSET uchiha_title_msg
+	call writeString
 
-mov eax, white + (black * 16)
-call SetTextcolor 
+	mov eax, white + (black * 16)
+	call SetTextcolor 
 
 	;asking player for name
 	mov edx, OFFSET enter_name
@@ -113,17 +113,11 @@ call SetTextcolor
 	mov ecx, SIZEOF enteredText   ; Copy all bytes (including null terminator)
 	rep movsb                     ; Copy string to player_name
 
-	; Print a newline
-	mov edx, OFFSET newline
-	call WriteString
-
-	; Display entered name
-	mov edx, OFFSET player_name
-	call WriteString
+	; Print 3 newlines
+	call crlf
+	call crlf
 	call crlf
 	
-		
-
 menu:
 	; display menu
 	mov edx, OFFSET menu_text
@@ -175,16 +169,19 @@ menu:
 		add balance, eax
 		JMP continue
 
-	play_game:	
+	play_game:
+		CMP balance, 0
+		JLE out_of_money
 		dec balance
-		mov eax, 10
-		;call RandomRange
-		;call WriteDec
-		;call Crlf
+		mov eax, 9
+		call RandomRange
+		call WriteDec
+		call Crlf
 		mov correct_answer, eax
 		mov edx, OFFSET enter_guess_game_msg
 		call writeString
 		call ReadInt
+		add correct_answer, 1
 		CMP eax, correct_answer
 		JE win_game
 		JMP lose_game
@@ -219,7 +216,20 @@ menu:
 		call SetTextcolor 
 		JMP play_again
 
+
+	out_of_money:
+		mov eax, yellow + (black * 16)
+		call SetTextcolor 
+		mov edx, OFFSET out_of_money_msg
+		call writeString
+		call crlf
+		mov eax, white + (black * 16)
+		call SetTextcolor 
+		JMP menu
+
 	play_again:
+		CMP balance, 0
+		JLE out_of_money
 		mov eax, yellow + (black * 16)
 		call SetTextcolor 
 		mov edx, OFFSET ask_to_play_again_msg
@@ -238,7 +248,7 @@ menu:
 		JMP continue
 
 	display_statistics: ; menu option 4
-		
+		call crlf
 		mov edx, OFFSET player_name
 		call WriteString
 		mov edx, OFFSET newline
@@ -291,8 +301,8 @@ menu:
 		exit
 
 	continue:
-		mov edx, OFFSET program_continued 
-		call WriteString
+		call crlf
+		call crlf
 		call crlf
 		JMP menu
 
@@ -300,5 +310,7 @@ menu:
 		mov edx, OFFSET program_exiting
 		call WriteString
 		exit
+
+
 main endp
 end main
