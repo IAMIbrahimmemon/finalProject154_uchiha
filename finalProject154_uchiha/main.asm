@@ -10,6 +10,7 @@
 INCLUDE Irvine32.inc
 
 .data
+
 ; general data
 balance DWORD 0 
 MAX_ALLOWED DWORD 20
@@ -17,12 +18,19 @@ amount DWORD 0
 correct_guesses DWORD 0
 missed_guesses DWORD 0
 games_played DWORD 0
-name DWORD 15 DUP(?)
+player_name BYTE 101 DUP(?) ; For storing the name
 money_won DWORD ?
 money_lost DWORD ?
 
 ; utility variables
 input DWORD 0
+enteredText BYTE 101 DUP(?) ; For temporary user input
+newline BYTE 0Dh, 0Ah, 0
+
+
+; Beginning Screen
+enter_name BYTE "Enter Your Name", 0dh, 0ah, 0dh, 0ah
+
 
 ; strings for display
 menu_text BYTE "*** Uchiha ***", 0dh, 0ah, 0dh, 0ah
@@ -38,7 +46,7 @@ current_balance_text BYTE "=> Your available balance is: $ ", 0
 
 add_credits_text BYTE "=> Please enter the amount you would like to add: ", 0
 
-program_continuesd BYTE " ", 0ah, 0dh, 0
+program_continued BYTE " ", 0ah, 0dh, 0
 
 program_exiting BYTE "Program is exiting. Thank you for playing. ",0
 
@@ -73,6 +81,8 @@ uchiha_title_msg BYTE "      ___           ___           ___                    
 	BYTE "    \::/  /       \:\__\         /:/  /      \/__/         /:/  /        /:/  /   ", 0ah, 0dh
 	BYTE "     \/__/         \/__/         \/__/                     \/__/         \/__/    ", 0ah, 0dh, 0ah, 0dh ,0
 
+
+
 .code
 
 
@@ -88,9 +98,34 @@ call writeString
 mov eax, white + (black * 16)
 call SetTextcolor 
 
-start:
-	; display menu
+	;asking player for name
+	mov edx, OFFSET enter_name
+	call WriteString   ; Display "Enter Your Name"
 
+	; Input from user
+	mov edx, OFFSET enteredText   ; Buffer for input
+	mov ecx, SIZEOF enteredText   ; Max size (101 bytes)
+	call ReadString               ; Read user input
+
+	; Copy enteredText to player_name
+	lea esi, enteredText          ; Source: enteredText
+	lea edi, player_name          ; Destination: player_name
+	mov ecx, SIZEOF enteredText   ; Copy all bytes (including null terminator)
+	rep movsb                     ; Copy string to player_name
+
+	; Print a newline
+	mov edx, OFFSET newline
+	call WriteString
+
+	; Display entered name
+	mov edx, OFFSET player_name
+	call WriteString
+	call crlf
+	
+		
+
+menu:
+	; display menu
 	mov edx, OFFSET menu_text
 	call writeString
 
@@ -121,7 +156,8 @@ start:
 	JMP continue 
 
 	display_balance: ; menu option 1
-		mov edx, OFFSET current_balance_text
+		mov edx, OFFSET current_balance_text ;Move the address of our "current balance text" to edx
+		
 		call WriteString
 		mov eax, green + (black * 16)
 		call SetTextcolor 
@@ -202,6 +238,11 @@ start:
 		JMP continue
 
 	display_statistics: ; menu option 4
+		
+		mov edx, OFFSET player_name
+		call WriteString
+		mov edx, OFFSET newline
+		call WriteString
 		mov eax, yellow + (black * 16)
 		call SetTextcolor 
 		mov edx, OFFSET stats_credit_msg
@@ -250,16 +291,14 @@ start:
 		exit
 
 	continue:
-		mov edx, OFFSET program_continuesd 
+		mov edx, OFFSET program_continued 
 		call WriteString
 		call crlf
-		JMP start
+		JMP menu
 
 	go_to_exit: 
 		mov edx, OFFSET program_exiting
 		call WriteString
 		exit
 main endp
-
-
 end main
