@@ -11,6 +11,8 @@ INCLUDE Irvine32.inc
 
 .data
 
+play_game PROC
+
 ; general data
 balance DWORD 0 
 MAX_ALLOWED DWORD 20
@@ -238,7 +240,12 @@ continue:
 
 main endp
 
-; Abstracted play_game procedure
+; -------------------------
+; play_game:   runs the main game logic
+; Receives:       money_won, money_lost, games_played, missed_guesses, correct_guesses, balance, play_again_input
+; Returns:        nothing
+; Requires:       balance, RandomRange, writeString, ReadInt, WriteInt, Crlf, SetTextcolor, enter_guess_game_msg, please_choose_an_option_msg, lose_guess_game_msg, correct_answer_guess_game_msg, win_guess_game_msg, out_of_money_msg, and ask_to_play_again_msg
+; -------------------------
 play_game proc
 
 start_of_play_game:
