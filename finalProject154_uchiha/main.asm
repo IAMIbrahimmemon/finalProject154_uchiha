@@ -67,6 +67,9 @@ stats_missed_guesses_msg BYTE "Missed Guesses: ", 0
 stats_money_won_msg BYTE "Money you won: ", 0
 stats_money_lost_msg BYTE "Money you lost: ", 0
 
+please_choose_an_option_msg BYTE "Please choose a correct option", 0
+overflow_msg BYTE "Your number is too big. Please use a smaller number.", 0
+
 correct_answer DWORD 0
 
 uchiha_title_msg BYTE "      ___           ___           ___                       ___           ___     ", 0ah, 0dh
@@ -147,11 +150,16 @@ menu:
 	CMP eax, input
 	JE exit_game
 
+	mov eax, yellow + (black * 16)
+	call SetTextcolor 
+	mov edx, OFFSET please_choose_an_option_msg
+	call writeString
+	mov eax, white + (black * 16)
+	call SetTextcolor
 	JMP continue 
 
 	display_balance: ; menu option 1
 		mov edx, OFFSET current_balance_text ;Move the address of our "current balance text" to edx
-		
 		call WriteString
 		mov eax, green + (black * 16)
 		call SetTextcolor 
@@ -159,15 +167,16 @@ menu:
 		call WriteInt
 		call crlf
 		mov eax, white + (black * 16)
-		call SetTextcolor 
+		call SetTextcolor
 		JMP continue
 
 	add_credits: ; menu option 2
-		mov edx, OFFSET add_credits_text
+		mov edx, OFFSET add_credits_text  ; Display message asking for credit
 		call WriteString
-		call ReadInt
-		add balance, eax
-		JMP continue
+		call ReadInt                    ; Read user input (the amount to add)
+
+		add balance, eax                 ; Update the balance
+		JMP continue                     ; Continue execution
 
 	play_game:
 		CMP balance, 0
@@ -175,16 +184,30 @@ menu:
 		dec balance
 		mov eax, 9
 		call RandomRange
-		call WriteDec
 		call Crlf
 		mov correct_answer, eax
+		add correct_answer, 1
 		mov edx, OFFSET enter_guess_game_msg
 		call writeString
 		call ReadInt
-		add correct_answer, 1
+
+		CMP eax, 0
+		JLE bad_input
+		CMP eax, 11
+		JGE bad_input
+
 		CMP eax, correct_answer
 		JE win_game
 		JMP lose_game
+
+	bad_input:
+		mov eax, yellow + (black * 16)
+		call SetTextcolor 
+		mov edx, OFFSET please_choose_an_option_msg
+		call writeString
+		mov eax, white + (black * 16)
+		call SetTextcolor
+		JMP play_game
 
 	lose_game:
 		mov eax, red + (black * 16)
