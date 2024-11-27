@@ -11,11 +11,10 @@ INCLUDE Irvine32.inc
 
 .data
 
-play_game PROC
 
 ; general data
 balance DWORD 0 
-MAX_ALLOWED DWORD 20
+max_allowed EQU 20
 amount DWORD 0
 correct_guesses DWORD 0
 missed_guesses DWORD 0
@@ -27,7 +26,6 @@ money_lost DWORD ?
 ; utility variables
 input DWORD 0
 enteredText BYTE 101 DUP(?) ; For temporary user input
-newline BYTE 0Dh, 0Ah, 0
 
 ; Beginning Screen
 enter_name BYTE "Enter Your Name: ", 0
@@ -67,7 +65,9 @@ stats_money_won_msg BYTE "Money you won: ", 0
 stats_money_lost_msg BYTE "Money you lost: ", 0
 
 please_choose_an_option_msg BYTE "Please choose a correct option", 0
-overflow_msg BYTE "Your number is too big. Please use a smaller number.", 0
+
+overflow_msg BYTE "Error: The max allowed balance is $20", 0ah, 0dh
+    BYTE "=> Your number is too big. Please try again.", 0ah, 0dh, 0
 
 correct_answer DWORD 0
 
@@ -166,23 +166,38 @@ display_balance: ; menu option 1
     JMP continue
 
 add_credits: ; menu option 2
+    mov eax, 0 ; Reset the eax to 0
+    add eax, balance 			; Add the balance to the eax
+    mov amount, 0                 ; Reset the amount to 0
+    add amount, eax             ; Add the balance to the amount
     mov edx, OFFSET add_credits_text  ; Display message asking for credit
     call WriteString
     call ReadInt                    ; Read user input (the amount to add)
-
-    add balance, eax                 ; Update the balance
+    add amount, eax                 ; Update the balance
+    CMP amount, max_allowed         ; Check if the amount is greater than the max allowed
+    JG overflow  ; If it is, jump to overflow
+    mov eax, amount                ; Move the amount to eax
+    mov balance, eax                ; Add the amount to the balance
     JMP continue                     ; Continue execution
 
+overflow: ; If the amount is greater than the max allowed
+    mov eax, red + (black * 16)
+    call SetTextcolor 
+    mov edx, OFFSET overflow_msg
+    call WriteString
+    mov eax, white + (black * 16)
+    call SetTextcolor
+    JMP add_credits
+
 call_play_game:
-    call play_game
+    call PlayGame
     JMP continue
 
 display_statistics: ; menu option 4
     call crlf
     mov edx, OFFSET player_name
     call WriteString
-    mov edx, OFFSET newline
-    call WriteString
+    call crlf
     mov eax, yellow + (black * 16)
     call SetTextcolor 
     mov edx, OFFSET stats_credit_msg
@@ -241,12 +256,12 @@ continue:
 main endp
 
 ; -------------------------
-; play_game:   runs the main game logic
+; PlayGame:   runs the main game logic
 ; Receives:       money_won, money_lost, games_played, missed_guesses, correct_guesses, balance, play_again_input
 ; Returns:        nothing
 ; Requires:       balance, RandomRange, writeString, ReadInt, WriteInt, Crlf, SetTextcolor, enter_guess_game_msg, please_choose_an_option_msg, lose_guess_game_msg, correct_answer_guess_game_msg, win_guess_game_msg, out_of_money_msg, and ask_to_play_again_msg
 ; -------------------------
-play_game proc
+PlayGame proc
 
 start_of_play_game:
 
@@ -339,6 +354,6 @@ play_again:
     JE start_of_play_game
     RET
 
-play_game endp
+PlayGame endp
 
 end main
