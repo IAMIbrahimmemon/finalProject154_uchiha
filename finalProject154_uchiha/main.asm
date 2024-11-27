@@ -65,6 +65,8 @@ stats_missed_guesses_msg BYTE "Missed Guesses: ", 0
 stats_money_won_msg BYTE "Money you won: ", 0
 stats_money_lost_msg BYTE "Money you lost: ", 0
 
+please_push_enter_msg BYTE "Please push enter to continue...", 0
+
 please_choose_an_option_msg BYTE "Please choose a correct option", 0
 
 overflow_msg BYTE "Error: The max allowed balance is $20", 0ah, 0dh
@@ -241,6 +243,9 @@ display_statistics: ; menu option 4
     call crlf
     mov eax, white + (black * 16)
     call SetTextcolor 
+    mov edx, OFFSET please_push_enter_msg
+    call WriteString
+    call ReadInt
     JMP continue
 
 exit_game:
