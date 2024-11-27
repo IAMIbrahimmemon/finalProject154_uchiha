@@ -50,6 +50,7 @@ enter_guess_game_msg BYTE "=> Enter a number from 1-10: ", 0
 win_guess_game_msg BYTE "You won, Congratulations. You get $2.", 0ah, 0dh, 0
 lose_guess_game_msg BYTE "You lost loser. You lost $1. ", 0
 correct_answer_guess_game_msg BYTE "The correct answer was: ",0
+win_money_overflow_msg BYTE "You won, But your money is going to overflow the max. So your new balance is $20", 0ah, 0dh, 0
 out_of_money_msg BYTE "You ran out of money. Please add some more to your account before you play a game.", 0
 
 ask_to_play_again_msg BYTE 0ah, 0dh, "Would you like to play again? Remember: 99% of gamblers quit before they hit BIG!", 0ah, 0dh 
@@ -313,12 +314,27 @@ lose_game:
     JMP play_again
 
 win_game:
+    CMP balance, 19
+    JGE win_game_overflow
     mov eax, green + (black * 16)
     call SetTextcolor 
     add money_won, 2
     mov edx, OFFSET win_guess_game_msg
     call writeString
     add balance, 2
+    add games_played, 1
+    add correct_guesses, 1
+    mov eax, white + (black * 16)
+    call SetTextcolor 
+    JMP play_again
+
+win_game_overflow:
+    mov eax, green + (black * 16)
+    call SetTextcolor 
+    add money_won, 1
+    mov edx, OFFSET win_money_overflow_msg
+    call writeString
+    mov balance, 20
     add games_played, 1
     add correct_guesses, 1
     mov eax, white + (black * 16)
